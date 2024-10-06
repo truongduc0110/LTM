@@ -36,21 +36,63 @@ public class MySQLConnection {
         return false;
     }
 
-    public static List<String[]> getAllUsers() {
-        List<String[]> users = new ArrayList<>();
-        Connection conn = getConnection();
-        String query = "SELECT username, fullname, email FROM users";
+    public static List<String[]> getFriends(String currentUser) {
+    // Thực hiện truy vấn để lấy danh sách bạn bè từ cơ sở dữ liệu
+    // Kết quả trả về là danh sách các mảng chứa thông tin của bạn bè
+    List<String[]> friendsList = new ArrayList<>();
+    Connection conn = getConnection();
+    String query = "SELECT friend_display_name FROM friends WHERE user_display_name = ?";
+    
+    try {
+        PreparedStatement ps = conn.prepareStatement(query);
+        ps.setString(1, currentUser);
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            String friendName = rs.getString("friend_display_name");
+            friendsList.add(new String[]{friendName}); // Thêm tên hiển thị bạn bè vào danh sách
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    } finally {
         try {
-            PreparedStatement ps = conn.prepareStatement(query);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                users.add(new String[]{rs.getString("username"), rs.getString("fullname"), rs.getString("email")});
+            if (conn != null) {
+                conn.close(); // Đảm bảo đóng kết nối
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return users;
     }
+    
+    return friendsList;
+}
+
+// Thêm bạn bè vào cơ sở dữ liệu
+public static boolean addFriend(String currentUser, String friendDisplayName) {
+    Connection conn = getConnection();
+    String query = "INSERT INTO friends (user_display_name, friend_display_name) VALUES (?, ?)";
+    
+    try {
+        PreparedStatement ps = conn.prepareStatement(query);
+        ps.setString(1, currentUser);
+        ps.setString(2, friendDisplayName);
+        
+        int rowsAffected = ps.executeUpdate();
+        return rowsAffected > 0; // Trả về true nếu thêm thành công
+    } catch (SQLException e) {
+        e.printStackTrace();
+    } finally {
+        try {
+            if (conn != null) {
+                conn.close(); // Đảm bảo đóng kết nối
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    return false; // Trả về false nếu có lỗi xảy ra
+}
 
     public static String searchUserInfo(String username) {
         Connection conn = getConnection();

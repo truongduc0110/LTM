@@ -99,28 +99,6 @@ if ("success".equals(response)) {
         setVisible(true);
     }
 
-    private void showUserList() {
-        JFrame userFrame = new JFrame("Danh sách người dùng");
-        userFrame.setSize(500, 400);
-        userFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        userFrame.setLocationRelativeTo(null);
-
-        List<String[]> users = MySQLConnection.getAllUsers();
-        String[] columnNames = {"Username", "Full Name", "Email"};
-        String[][] data = new String[users.size()][3];
-
-        for (int i = 0; i < users.size(); i++) {
-            data[i][0] = users.get(i)[0];
-            data[i][1] = users.get(i)[1];
-            data[i][2] = users.get(i)[2];
-        }
-
-        userTable = new JTable(data, columnNames);
-        JScrollPane scrollPane = new JScrollPane(userTable);
-        userFrame.add(scrollPane);
-
-        userFrame.setVisible(true);
-    }
     
 
     public static void main(String[] args) {
